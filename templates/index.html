@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fdf9;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #2c5e33;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .search-bar {
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            transition: border 0.3s;
+        }
+        .search-bar:focus {
+            outline: none;
+            border-color: #4caf50;
+        }
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+            font-weight: 600;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button.danger {
+            background: #dc3545;
+        }
+        button.danger:hover {
+            background: #c82333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        thead {
+            background: #f8f9fa;
+        }
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #495057;
+            border-bottom: 2px solid #dee2e6;
+        }
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+            color: #212529;
+        }
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+        .action-btn {
+            padding: 6px 12px;
+            font-size: 14px;
+            margin-right: 5px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .modal h2 {
+            margin-bottom: 20px;
+            color: #495057;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #495057;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: #4caf50;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            font-size: 18px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            background: #4caf50;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>User Management</h1>
+        
+        <div class="card">
+            <input type="text" class="search-bar" id="searchBar" placeholder="🔍 Search users by name, email, or role...">
+            
+            <div class="actions">
+                <button onclick="openAddModal()">➕ Add User</button>
+                <button class="danger" onclick="refreshUsers()">🔄 Refresh</button>
+            </div>
+
+            <table id="usersTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersBody">
+                    <tr>
+                        <td colspan="5" class="no-results">Loading users...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <h2>Add New User</h2>
+            <div class="input-group">
+                <label>Name</label>
+                <input type="text" id="newName" placeholder="Enter full name">
+            </div>
+            <div class="input-group">
+                <label>Email</label>
+                <input type="email" id="newEmail" placeholder="Enter email address">
+            </div>
+            <div class="input-group">
+                <label>Role</label>
+                <input type="text" id="newRole" placeholder="Enter role (e.g., Developer)">
+            </div>
+            <div class="modal-actions">
+                <button onclick="closeAddModal()">Cancel</button>
+                <button onclick="addUser()">Add User</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allUsers = [];
+
+        window.onload = () => {
+            loadUsers();
+        };
+
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/users');
+                const data = await response.json();
+                allUsers = data.users || [];
+                displayUsers(allUsers);
+            } catch (error) {
+                document.getElementById('usersBody').innerHTML = 
+                    '<tr><td colspan="5" class="no-results">Error loading users</td></tr>';
+            }
+        }
+
+        function displayUsers(users) {
+            const tbody = document.getElementById('usersBody');
+            
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="no-results">No users found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = users.map(user => `
+                <tr>
+                    <td>${user.id}</td>
+                    <td>${user.name}</td>
+                    <td>${user.email}</td>
+                    <td><span class="badge">${user.role}</span></td>
+                    <td>
+                        <button class="action-btn danger" onclick="deleteUser(${user.id})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        document.getElementById('searchBar').addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filtered = allUsers.filter(user => 
+                user.name.toLowerCase().includes(searchTerm) ||
+                user.email.toLowerCase().includes(searchTerm) ||
+                user.role.toLowerCase().includes(searchTerm)
+            );
+            displayUsers(filtered);
+        });
+
+        function openAddModal() {
+            document.getElementById('addModal').style.display = 'block';
+        }
+
+        function closeAddModal() {
+            document.getElementById('addModal').style.display = 'none';
+            document.getElementById('newName').value = '';
+            document.getElementById('newEmail').value = '';
+            document.getElementById('newRole').value = '';
+        }
+
+        async function addUser() {
+            const name = document.getElementById('newName').value.trim();
+            const email = document.getElementById('newEmail').value.trim();
+            const role = document.getElementById('newRole').value.trim();
+
+            if (!name || !email || !role) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, email, role })
+                });
+
+                if (response.ok) {
+                    closeAddModal();
+                    loadUsers();
+                    alert('User added successfully!');
+                } else {
+                    alert('Failed to add user');
+                }
+            } catch (error) {
+                alert('Error adding user');
+            }
+        }
+
+        async function deleteUser(userId) {
+            if (!confirm('Are you sure you want to delete this user?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/users/${userId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    loadUsers();
+                    alert('User deleted successfully!');
+                } else {
+                    alert('Failed to delete user');
+                }
+            } catch (error) {
+                alert('Error deleting user');
+            }
+        }
+
+        function refreshUsers() {
+            document.getElementById('searchBar').value = '';
+            loadUsers();
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('addModal');
+            if (event.target == modal) {
+                closeAddModal();
+            }
+        }
+    </script>
+</body>
+</html>
