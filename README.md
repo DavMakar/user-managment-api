@@ -1,6 +1,23 @@
-# User Management API with Docker
+# User Management API
 
-https://hub.docker.com/r/davmakar/user-management-api
+A simple RESTful API built with Flask for managing users, packaged in a lightweight Docker container.
+
+[![Docker Image](https://img.shields.io/badge/docker-davmakar/user--management--api-blue?logo=docker)](https://hub.docker.com/r/davmakar/user-management-api)
+
+---
+
+## 🚀 Quick Start
+
+### 1. Run the API with Docker
+
+```bash
+docker run -d -p 5000:5000 --name user-api davmakar/user-management-api
+```
+
+### 2. Open in your browser
+
+Visit:  
+👉 [http://localhost:5000](http://localhost:5000)
 
 ## API Endpoints
 
