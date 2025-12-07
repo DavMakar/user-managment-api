@@ -1,0 +1,34 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15
+    container_name: my-postgres
+    environment:
+      POSTGRES_PASSWORD: master
+      POSTGRES_USER: davit
+      POSTGRES_DB: db2025
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init_scripts:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: user-managment-api
+    ports:
+      - "5000:5000"
+    environment:
+      DATABASE_URL: postgresql://davit:master@postgres:5432/db2025
+      FLASK_ENV: development
+    depends_on:
+      - postgres
+    volumes:
+      - ../:/app
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    role VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO users (id, name, email, role) VALUES 
+(1, 'John Doe', 'john@example.com', 'Developer'),
+(2, 'Jane Smith', 'jane@example.com', 'Designer'),
+(3, 'Bob Johnson', 'bob@example.com', 'Manager'),
+(4, 'Alice Brown', 'alice@example.com', 'Developer'),
+(5, 'Charlie Wilson', 'charlie@example.com', 'Tester')
+ON CONFLICT (id) DO UPDATE SET
+    name = EXCLUDED.name,
+    email = EXCLUDED.email,
+    role = EXCLUDED.role;
+
+-- Reset the ID sequence to the maximum existing ID + 1
+SELECT setval('users_id_seq', (SELECT MAX(id) FROM users), true);
